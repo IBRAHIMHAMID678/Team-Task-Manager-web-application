@@ -2,8 +2,6 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
 from django.contrib.auth import get_user_model
 from .models import Team
 from .serializers import TeamSerializer
@@ -11,7 +9,6 @@ from .serializers import TeamSerializer
 User = get_user_model()
 
 
-@method_decorator(csrf_exempt, name='dispatch')
 class TeamViewSet(viewsets.ModelViewSet):
     serializer_class = TeamSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -24,7 +21,6 @@ class TeamViewSet(viewsets.ModelViewSet):
         ).distinct()
 
     def perform_create(self, serializer):
-        # Creator is auto-added as member
         team = serializer.save(creator=self.request.user)
         team.members.add(self.request.user)
 
