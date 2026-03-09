@@ -109,6 +109,12 @@ DATABASES = {
     )
 }
 
+# Password hashing – bcrypt is the primary hasher (no plain-text storage)
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',  # fallback for existing hashes
+]
+
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
