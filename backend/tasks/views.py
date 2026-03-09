@@ -1,5 +1,8 @@
 from rest_framework import viewsets, permissions
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.response import Response
+from datetime import date, timedelta
 from .models import Task
 from .serializers import TaskSerializer
 
@@ -15,11 +18,11 @@ class TaskViewSet(viewsets.ModelViewSet):
             Task.objects.filter(team__creator=user)
         ).distinct()
 
-        team_id = self.request.query_params.get('team', None)
+        team_id = self.request.query_params.get('team')
         if team_id:
             queryset = queryset.filter(team_id=team_id)
 
-        assigned_to = self.request.query_params.get('assigned_to', None)
+        assigned_to = self.request.query_params.get('assigned_to')
         if assigned_to:
             queryset = queryset.filter(assigned_to_id=assigned_to)
 
@@ -31,3 +34,28 @@ class TaskViewSet(viewsets.ModelViewSet):
         if team.creator != user and user not in team.members.all():
             raise PermissionDenied("You are not a member of this team.")
         serializer.save()
+
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def due_date_reminders(request):
+    """
+    Returns tasks assigned to the current user that are due within
+    the next 3 days (inclusive of today). Used for login-time reminders.
+    """
+    user = request.user
+    today = date.today()
+    upcoming = today + timedelta(days=3)
+
+    tasks = Task.objects.filter(
+        assigned_to=user,
+        due_date__gte=today,
+        due_date__lte=upcoming,
+        status__in=['Pending', 'In Progress'],
+    ).order_by('due_date')
+
+    serializer = TaskSerializer(tasks, many=True)
+    return Response({
+        'count': tasks.count(),
+        'reminders': serializer.data,
+    })
