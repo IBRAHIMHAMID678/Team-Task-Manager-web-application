@@ -1,26 +1,44 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, permissions, status
+from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.response import Response
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.contrib.auth import get_user_model
 from .models import Team
 from .serializers import TeamSerializer
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework import status
-from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+
+@method_decorator(csrf_exempt, name='dispatch')
 class TeamViewSet(viewsets.ModelViewSet):
     serializer_class = TeamSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Team.objects.filter(members=self.request.user) | Team.objects.filter(creator=self.request.user)
+        user = self.request.user
+        return (
+            Team.objects.filter(members=user) |
+            Team.objects.filter(creator=user)
+        ).distinct()
 
     def perform_create(self, serializer):
+        # Creator is auto-added as member
         team = serializer.save(creator=self.request.user)
         team.members.add(self.request.user)
+
+    def destroy(self, request, *args, **kwargs):
+        team = self.get_object()
+        if team.creator != request.user:
+            raise PermissionDenied("Only the team creator can delete this team.")
+        return super().destroy(request, *args, **kwargs)
 
     @action(detail=True, methods=['post'])
     def add_member(self, request, pk=None):
         team = self.get_object()
+        if team.creator != request.user:
+            raise PermissionDenied("Only the team creator can add members.")
         user_id = request.data.get('user_id')
         try:
             user = User.objects.get(id=user_id)
