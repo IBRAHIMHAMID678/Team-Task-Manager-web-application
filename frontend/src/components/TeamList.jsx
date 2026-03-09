@@ -31,41 +31,55 @@ const TeamList = ({ activeTeam, setActiveTeam }) => {
   };
 
   return (
-    <div className="p-4 h-full flex flex-col">
-      <h2 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">Your Teams</h2>
-      <div className="flex-1 overflow-y-auto mb-4 space-y-2">
-        {teams.length === 0 ? (
-          <p className="text-gray-500 text-sm">No teams found.</p>
-        ) : (
-          teams.map(team => (
-            <div 
-              key={team.id}
-              onClick={() => setActiveTeam(team)}
-              className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                activeTeam?.id === team.id ? 'bg-blue-100 text-blue-800 font-medium border border-blue-200' : 'bg-white hover:bg-gray-100 text-gray-700 border border-transparent'
-              }`}
-            >
-              {team.name}
-              <div className="text-xs text-gray-500 mt-1">{team.members_details.length} members</div>
-            </div>
-          ))
-        )}
+    <div className="flex flex-col h-full bg-white">
+      <div className="px-6 py-4">
+        <h2 className="text-xs font-bold text-surface-400 uppercase tracking-widest mb-4">Your Workspaces</h2>
+        
+        <div className="space-y-1">
+          {teams.length === 0 ? (
+            <p className="text-surface-400 text-sm italic bg-surface-50 p-3 rounded-xl border border-dashed border-surface-200">No workspaces yet. Create one below.</p>
+          ) : (
+            teams.map(team => (
+              <button 
+                key={team.id}
+                onClick={() => setActiveTeam(team)}
+                className={`w-full text-left px-4 py-3 rounded-xl transition-all duration-200 flex items-center justify-between group ${
+                  activeTeam?.id === team.id 
+                    ? 'bg-brand-50 text-brand-700 font-semibold shadow-sm border border-brand-100' 
+                    : 'bg-transparent text-surface-600 hover:bg-surface-50 border border-transparent hover:border-surface-200'
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className={`w-2 h-2 rounded-full ${activeTeam?.id === team.id ? 'bg-brand-500 shadow-[0_0_8px_rgba(20,184,166,0.5)]' : 'bg-surface-300 group-hover:bg-brand-300 transition-colors'}`}></div>
+                  <span className="truncate max-w-[140px] text-sm">{team.name}</span>
+                </div>
+                <div className={`text-xs px-2 py-0.5 rounded-full ${activeTeam?.id === team.id ? 'bg-brand-100 text-brand-600' : 'bg-surface-100 text-surface-400 group-hover:bg-surface-200'}`}>
+                  {team.members_details.length}
+                </div>
+              </button>
+            ))
+          )}
+        </div>
       </div>
 
-      <div className="mt-auto border-t pt-4">
-        <form onSubmit={handleCreateTeam} className="flex flex-col space-y-2">
+      <div className="mt-auto p-6 bg-surface-50/50 border-t border-surface-100">
+        <h3 className="text-xs font-bold text-surface-400 uppercase tracking-widest mb-3">Create Workspace</h3>
+        <form onSubmit={handleCreateTeam} className="relative">
           <input
             type="text"
-            placeholder="New Team Name"
+            placeholder="e.g. Design Team"
             value={newTeamName}
             onChange={(e) => setNewTeamName(e.target.value)}
-            className="w-full px-3 py-2 border rounded-md text-sm shadow-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300"
+            className="w-full pl-4 pr-10 py-2.5 bg-white border border-surface-200 rounded-xl text-sm placeholder-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all shadow-sm"
           />
           <button
             type="submit"
-            className="w-full px-4 py-2 text-sm text-white bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            disabled={!newTeamName.trim()}
+            className="absolute right-1.5 top-1.5 bottom-1.5 p-1.5 bg-brand-50 text-brand-600 rounded-lg hover:bg-brand-100 transition-colors disabled:opacity-50 disabled:bg-surface-100 disabled:text-surface-400"
           >
-            Create Team
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+            </svg>
           </button>
         </form>
       </div>
