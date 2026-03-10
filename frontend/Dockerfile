@@ -11,9 +11,11 @@ FROM nginx:alpine
 # Copy built files
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Copy custom nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy custom nginx configuration as a template
+COPY nginx.conf /etc/nginx/conf.d/config.template
 
-# Expose port and start nginx
+# Expose port (documented, but Railway uses $PORT)
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+
+# Use a shell command to substitute $PORT into the config and start nginx
+CMD ["sh", "-c", "envsubst '${PORT}' < /etc/nginx/conf.d/config.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]
