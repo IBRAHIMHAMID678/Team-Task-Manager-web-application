@@ -12,7 +12,8 @@ FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 
 # Copy custom nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf.template
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Start nginx with dynamically injected port mapping
-CMD envsubst < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'
+# Expose port and start nginx
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
