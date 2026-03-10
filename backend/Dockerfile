@@ -24,4 +24,4 @@ COPY . /app/
 RUN python manage.py collectstatic --noinput
 
 # Run gunicorn
-CMD exec gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 0 core.wsgi:application
+CMD sh -c "gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 1 --threads 8 --timeout 0 core.wsgi:application"
