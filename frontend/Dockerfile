@@ -1,5 +1,9 @@
 FROM node:18-alpine AS build
 
+# This tells Docker to take the VITE_API_URL from Railway and build it into the React code
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
