@@ -6,6 +6,7 @@ from .serializers import UserSerializer
 
 
 class RegisterView(APIView):
+    """Register a new user account."""
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
@@ -17,6 +18,7 @@ class RegisterView(APIView):
 
 
 class LoginView(APIView):
+    """Login an existing user and return their session."""
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
@@ -33,6 +35,7 @@ class LoginView(APIView):
 
 
 class LogoutView(APIView):
+    """Logs out the current user session."""
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):

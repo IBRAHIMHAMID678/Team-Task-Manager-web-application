@@ -8,6 +8,10 @@ from .serializers import TaskSerializer
 
 
 class TaskViewSet(viewsets.ModelViewSet):
+    """
+    CRUD for tasks with role-based access control.
+    Filters by team or assignee via query params.
+    """
     serializer_class = TaskSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -34,6 +38,21 @@ class TaskViewSet(viewsets.ModelViewSet):
         if team.creator != user and user not in team.members.all():
             raise PermissionDenied("You are not a member of this team.")
         serializer.save()
+
+    def perform_update(self, serializer):
+        task = self.get_object()
+        user = self.request.user
+        # Allow only team creator or the assigned user to update task status/details
+        if task.team.creator != user and task.assigned_to != user:
+            raise PermissionDenied("Only the team creator or the assignee can modify this task.")
+        serializer.save()
+
+    def destroy(self, request, *args, **kwargs):
+        task = self.get_object()
+        # Only team creator can delete a task
+        if task.team.creator != request.user:
+            raise PermissionDenied("Only the team creator can delete tasks.")
+        return super().destroy(request, *args, **kwargs)
 
 
 @api_view(['GET'])

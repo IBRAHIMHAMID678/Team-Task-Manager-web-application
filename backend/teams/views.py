@@ -10,6 +10,9 @@ User = get_user_model()
 
 
 class TeamViewSet(viewsets.ModelViewSet):
+    """
+    CRUD for teams. Only includes teams the user is a member of.
+    """
     serializer_class = TeamSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -23,6 +26,12 @@ class TeamViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         team = serializer.save(creator=self.request.user)
         team.members.add(self.request.user)
+
+    def perform_update(self, serializer):
+        team = self.get_object()
+        if team.creator != self.request.user:
+            raise PermissionDenied("Only the team creator can modify this team.")
+        serializer.save()
 
     def destroy(self, request, *args, **kwargs):
         team = self.get_object()

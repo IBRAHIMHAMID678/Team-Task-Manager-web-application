@@ -6,12 +6,13 @@ import TaskList from '../components/TaskList';
 import axios from 'axios';
 
 const Dashboard = () => {
+  // --- STATE & CONTEXT ---
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [activeTeam, setActiveTeam] = useState(null);
+  const [activeTeam, setActiveTeam] = useState(null); // Currently selected workspace
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [allTasksCount, setAllTasksCount] = useState(0);
-  const [reminders, setReminders] = useState([]);
+  const [reminders, setReminders] = useState([]); // Upcoming due tasks
   const [showReminders, setShowReminders] = useState(true);
 
   useEffect(() => {
@@ -23,11 +24,11 @@ const Dashboard = () => {
   useEffect(() => {
     if (user) {
       // Fetch total task count
-      axios.get('/tasks/').then(res => setAllTasksCount(res.data.length)).catch(() => {});
+      axios.get('/tasks/').then(res => setAllTasksCount(res.data.length)).catch(() => { });
       // Fetch due-date reminders
       axios.get('/tasks/reminders/').then(res => {
         if (res.data.count > 0) setReminders(res.data.reminders);
-      }).catch(() => {});
+      }).catch(() => { });
     }
   }, [user]);
 
@@ -141,14 +142,15 @@ const Dashboard = () => {
           <div className="flex-1 overflow-y-auto min-h-0">
             <TeamList
               activeTeam={activeTeam}
-              setActiveTeam={(team) => { setActiveTeam(team); setIsSidebarOpen(false); }}
+              setActiveTeam={setActiveTeam}
+              closeSidebar={() => setIsSidebarOpen(false)}
             />
           </div>
         </div>
 
         {/* Task Area */}
         <main className="flex-1 overflow-x-hidden overflow-y-auto w-full">
-          <TaskList team={activeTeam} onTaskCountChange={setAllTasksCount} />
+          <TaskList team={activeTeam} />
         </main>
       </div>
     </div>

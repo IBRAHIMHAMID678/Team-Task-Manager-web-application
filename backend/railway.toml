@@ -1,0 +1,18 @@
+[build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+startCommand = "gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 0 core.wsgi:application"
+restartPolicyType = "on_failure"
+
+[deploy.healthcheck]
+path = "/admin/login/"
+interval = 10
+timeout = 5
+success_threshold = 1
+failure_threshold = 3
+
+[deploy.scripts]
+# Automatically run migrations on every deploy
+postDeploy = "python manage.py migrate"
